@@ -479,14 +479,18 @@
 #define LOGL(X) Serial.println(X)
 #define LOGNL(X) Serial.print(X)
 #include "libintdsp/libintdsp.h"
-#include "libintdsp/osc_t.h"
-#include "libintdsp/private/libintdsp.cpp"
-#include "libintdsp/private/nodes.cpp"
+#include "libintdsp/_source/nodes.c"
+#include "libintdsp/_source/init.c"
+#include "libintdsp/_source/graph.c"
 
 int16_t spl_out_a,spl_out_b;
 int32_t spl_out[128];
 int32_t spl_out_count;
 agraph_t gg;
+
+int16_t sin_fn(int16_t ph){
+	return int16_t(32766.0 * sin(2.0 * 3.1415 * double(ph)/double(LUT_COUNT)));
+}
 
 void sound_begin(){
 
@@ -494,7 +498,7 @@ void sound_begin(){
   
   i2s_config_t i2s_config = {
       (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
-      44100,
+      48000,
       I2S_BITS_PER_SAMPLE_16BIT,
       I2S_CHANNEL_FMT_RIGHT_LEFT,
       I2S_COMM_FORMAT_STAND_I2S,
@@ -599,7 +603,7 @@ void sgtl_begin(){
   delay(400);
   sgtl_write_v(CHIP_LINE_OUT_VOL, 0x1D1D); //CHIP_LINE_OUT_VOL - default approx 1.3 volts peak-to-peak
   
-  sgtl_write_v(CHIP_CLK_CTRL, 0x0004);  //CHIP_CLK_CTRL - 48 kHz, 256*Fs
+  sgtl_write_v(CHIP_CLK_CTRL, 0x0008);  //CHIP_CLK_CTRL - 48 kHz, 256*Fs
   sgtl_write_v(CHIP_I2S_CTRL, 0x0030); //CHIP_I2S_CTRL - SCLK=32*Fs, 16bit, I2S format
 
   sgtl_write_v(CHIP_SSS_CTRL, 0x0010); //CHIP_SSS_CTRL - ADC->I2S, I2S->DAC
@@ -616,7 +620,7 @@ void sgtl_begin(){
 void setup() {
   Serial.begin(115200);
   
-  libintdsp_init(&gg);
+  libintdsp_init(&gg,sin_fn);
 
   auto os1 = new_osc(&gg,"osca");
   auto os2 = new_osc(&gg,"oscb");
