@@ -4,13 +4,13 @@ in_pin:left input
 in_pin:right input
 
 @init
-rec_buf_size = 256;
+rec_buf_size = 1024;
 rec_buf = 100;
 trig_lvl = 0.1;
 trig = 0;
 trig_T = 0;
 freq = 0;
-trig_timebase = 20;
+trig_timebase = 1;
 
 @sample    
 	spl0 > trig_lvl && spl00 < trig_lvl ? (
@@ -18,7 +18,13 @@ trig_timebase = 20;
 			trig = 1;
 			in_i = 0;    
 		);                       
-		freq = srate / trig_T;
+		freq_av += srate / trig_T;
+		freq_avc += 1;
+		freq_avc == 10 ? (
+			freq = freq_av / freq_avc;
+			freq_avc = 0;
+			freq_av = 0;
+		);
 		trig_T = 0;  
 	);     
 	trig_T += 1;
