@@ -1,0 +1,35 @@
+desc:Basic Scope
+
+in_pin:left input
+in_pin:right input
+
+@init
+rec_buf = 100;
+trig_lvl = 0.2;
+trig = 0;
+
+@sample
+spl0 > trig_lvl && spl00 < trig_lvl ? (
+	rec_buf[in_i] = abs(spl0);
+	in_i = in_i + 1;
+	trig = trig | in_i == 255 ? 1 : 0;
+) : (
+	spl00 = spl0
+);
+
+@block
+
+@gfx 128 64
+
+gfx_r = 0;
+gfx_g = 0;
+gfx_b = 0;
+gfx_rect(0,0,128,64);
+
+trig ? (
+	ii = 0;
+	loop(128, 
+			
+	)
+) : ( )
+
