@@ -4,30 +4,38 @@ in_pin:left input
 in_pin:right input
 
 @init
+rec_buf_size = 256;
 rec_buf = 100;
-trig_lvl = 0.2;
+trig_lvl = 0.1;
 trig = 0;
+trig_T = 0;
+freq = 0;
+trig_timebase = 20;
 
-@sample
-	spl0 > trig_lvl && spl00 < trig_lvl && !trig ? (
-		trig = 1;
-		in_i = 0;
-	);
-	trig == 1 ? (
-		rec_buf[in_i] = spl0;
-		in_i = (in_i + 1) % 1024;     
-		in_i == 1023 ? (
-			trig = 2;
+@sample    
+	spl0 > trig_lvl && spl00 < trig_lvl ? (
+		!trig ? (
+			trig = 1;
+			in_i = 0;    
+		);                       
+		freq = srate / trig_T;
+		trig_T = 0;  
+	);     
+	trig_T += 1;
+	trig == 1 ? (       
+		rec_buf[in_i] = -spl0;
+		in_i = in_i + 1;     
+		in_i == rec_buf_size-1 ? (
+			in_i = 0;
+			trig = 2;         
 		);
 	);
 	spl00 = spl0;
 
 
 @gfx
-//basic Timebase multiplier
-T = 2;
-ww = 128;
-hh = 64;
+ww = gfx_w;
+hh = gfx_h;
 //gfx_r = gfx_g = gfx_b = 0.1;
 //gfx_rect(0,0,128,64);
 gfx_r = gfx_g = gfx_b = 1;
@@ -43,14 +51,27 @@ trig == 2 ? (
 		yy = rec_buf[i];
 		yy = hh/2 + yy*hh;
 		yy = max(0,min(hh,yy));
-		gfx_line(xx,yy,xx+1,yy);
+		yy < hh/2 ?
+		gfx_rect(xx,yy,1,hh/2-yy)
+		:
+		gfx_rect(xx,hh/2,1,yy - hh/2);
 		xxo = xx;
 		yyo = yy;
 		ii = (ii + 1);
-		i = ii/T;
+		i = ii/trig_timebase;
 	);
 	trig = 0
-)
+);
+gfx_r = gfx_g = gfx_b = 0;
+gfx_rect(0,0,gfx_w,16);
+gfx_r = gfx_g = gfx_b = 1;
+gfx_x = gfx_y = 0;
+gfx_printf("TR: %.3f (%.2fdB) F:%.2f",trig_lvl, 20*log(trig_lvl), freq);
+gfx_y = 8;
+gfx_x = 0;
+tb = rec_buf_size / trig_timebase;
+tbs = srate / tb/2;
+gfx_printf("TB: %dSPL %fs",tb,tbs);
 //);
 //: (
 //     ii = 0;
