@@ -24,22 +24,30 @@ trig = 0;
 
 
 @gfx
-ww = 1024;
-hh = gfx_h;
+//basic Timebase multiplier
+T = 2;
+ww = 128;
+hh = 64;
 //gfx_r = gfx_g = gfx_b = 0.1;
 //gfx_rect(0,0,128,64);
 gfx_r = gfx_g = gfx_b = 1;
 gfx_line(0,hh/2,ww,hh/2);
 trig == 2 ? (
 	ii = 0;
+	iii = 0;
+	xxo= 0;
+	yyo=hh/2;
 	loop(ww, 
 		xx = ii;
-		yy = rec_buf[ii];
+		iii += 1;
+		yy = rec_buf[i];
 		yy = hh/2 + yy*hh;
 		yy = max(0,min(hh,yy));
 		gfx_line(xx,yy,xx+1,yy);
-	
-		ii = ii + 1;
+		xxo = xx;
+		yyo = yy;
+		ii = (ii + 1);
+		i = ii/T;
 	);
 	trig = 0
 )
