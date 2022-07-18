@@ -9,39 +9,40 @@ trig_lvl = 0.2;
 trig = 0;
 
 @sample
-	spl0 > trig_lvl && spl00 < trig_lvl ? (
+	spl0 > trig_lvl && spl00 < trig_lvl && !trig ? (
 		trig = 1;
 		in_i = 0;
 	);
-	trig ? (
+	trig == 1 ? (
 		rec_buf[in_i] = spl0;
-		in_i = (in_i + 1) % 128;
-	);     
-	in_i == 128 ? (
-		trig = 0;
+		in_i = (in_i + 1) % 1024;     
+		in_i == 1023 ? (
+			trig = 2;
+		);
 	);
 	spl00 = spl0;
 
 
 @gfx
-
-gfx_r = 0;
-gfx_g = 0;
-gfx_b = 0.4;
-gfx_rect(0,0,128,64);
-
-//!trig ? (
+ww = 1024;
+hh = gfx_h;
+//gfx_r = gfx_g = gfx_b = 0.1;
+//gfx_rect(0,0,128,64);
+gfx_r = gfx_g = gfx_b = 1;
+gfx_line(0,hh/2,ww,hh/2);
+trig == 2 ? (
 	ii = 0;
-	gfx_r = gfx_g = gfx_b = 1;
-	loop(128, 
+	loop(ww, 
 		xx = ii;
 		yy = rec_buf[ii];
-		yy = 32 + yy*-64;
-		
+		yy = hh/2 + yy*hh;
+		yy = max(0,min(hh,yy));
 		gfx_line(xx,yy,xx+1,yy);
 	
 		ii = ii + 1;
 	);
+	trig = 0
+)
 //);
 //: (
 //     ii = 0;
