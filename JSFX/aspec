@@ -4,15 +4,16 @@ in_pin:left input
 in_pin:right input
 
 @init
-rec_buf_size = 512;
+n = 128;
+nn = n * 2;
 rec_buf = 100;
-win = rec_buf + rec_buf_size;
-ftd = win + rec_buf_size*2;
+win = rec_buf + nn;
+ftd = win + nn;
 
 //window init
 i=0;
-loop(rec_buf_size*2,
-  win[i] = abs(sin(2*3.141592*i/(n*2))); //half sine window(s)
+loop(nn,
+  win[i] = abs(sin(2*3.141592*i/(nn))); //half sine window(s)
   win[i] *= win[i];
   i+=1;
 );
@@ -20,32 +21,33 @@ loop(rec_buf_size*2,
 @sample       
 rec_buf[rec_i] = spl0;
 rec_i += 1;
-rec_i == rec_buf_size/2 ? rec_j = 1;
-rec_i == rec_buf_size ? rec_j = 2;
-rec_i %= rec_buf_size;
+rec_i == n/2 ? rec_j = 1;
+rec_i == n ? rec_j = 2;
+rec_i %= n;
 
 @gfx
-ww = 128;
-hh = 64;
-gfx_r = gfx_g = gfx_b = 0;
+ss = 2;
+ww = 128*ss;
+hh = 64*ss;
+gfx_r = gfx_g = 0.1;
 gfx_rect(0,0,ww,hh);
 gfx_r = gfx_g = gfx_b = 1;
 
 rec_j ? (
-	n = rec_buf_size/2;
 	rec_j = 0;
 	i = 0;
 	loop(n,
-		j = (rec_j-1) * (rec_buf_size/2);
-		ftd[i] = rec_buf[i + j] * win[i];
+		j = i + (rec_j)*n;
+		ftd[i] = rec_buf[j];// * win[i];
 		i += 1;
 	);     
 	fft_real(ftd,n);
 	fft_permute(ftd,n);
 	i = 0;
 	loop(n, 
-		dd = hh*(ftd[i]/n);
-		gfx_rect(i,0,1,dd);
+		dd = hh*(abs(ftd[i*4]/n));          
+		gfx_r = i/n;
+		gfx_rect(i*ss*2,0,1*2*ss,dd);
 		i += 1;
 	);     
 );
