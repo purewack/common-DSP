@@ -12,10 +12,9 @@ ftd = win + nn;
 
 //window init
 i=0;
-loop(nn,
-  win[i] = abs(sin(2*3.141592*i/(nn))); //half sine window(s)
-  win[i] *= win[i];
-  i+=1;
+loop(n/2,
+  win[i] = sin(2*3.141592*i/(n)); //half sine window(s)
+  i+=1
 );
 
 @sample       
@@ -34,11 +33,11 @@ gfx_rect(0,0,ww,hh);
 gfx_r = gfx_g = gfx_b = 1;
 
 rec_j ? (
-	rec_j = 0;
 	i = 0;
 	loop(n,
-		j = i + (rec_j)*n;
-		ftd[i] = rec_buf[j];// * win[i];
+		rec_j == 1 ? j = 0 : j = n/2;
+		j += i;
+		ftd[i] = rec_buf[j] * win[i];
 		i += 1;
 	);     
 	fft_real(ftd,n);
@@ -46,9 +45,10 @@ rec_j ? (
 	i = 0;
 	loop(n, 
 		dd = hh*(abs(ftd[i*4]/n));          
-		gfx_r = i/n;
-		gfx_rect(i*ss*2,0,1*2*ss,dd);
+		//dd = win[i*2]*hh;
+		gfx_rect(i*2*ss,0,1+1*ss,dd);
 		i += 1;
 	);     
+	rec_j = 0;     
 );
 
