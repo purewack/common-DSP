@@ -4,9 +4,9 @@ in_pin:left input
 in_pin:right input
 
 @init
-xlogscale = 0;
+xlogscale = 1;
 ylogscale = 1;
-yfloor = 0;
+yfloor = -120;
 
 
 n = 256;
@@ -16,13 +16,13 @@ win = rec_buf + nn;
 ftd = win + nn;
 
 //window init
-pi = 3.141592;
 i=0;
 loop(n,
   //Blackman window
-  //win[i] = 0.42 - 0.5*cos(2*pi*i/(n)) + 0.08*cos(4*pi*i/(n/2)); 
-  win[i] = sin(2*3.141592*i/(n)); //sine/2 window
-  i+=1
+  win[i] = 0.42 - 0.5*cos(2*$pi*i/n) + 0.08*cos(4*$pi*i/n); 
+  //win[i] = sin(2*$pi*i/(nn)); //sine/2 window
+  //win[i] = 1;
+  i+=1;
 );
 
 @sample       
@@ -56,10 +56,14 @@ rec_j ? (
 	j = 0;
 	loop(n/2, 
 		sp = sqrt(ftd[i]*ftd[i] + ftd[i+1]*ftd[i+1]);
-		dd = hh*6*(sp/n);
-		//dd = hh*(log10(ftd[4*i])/n);
+		dd0 = hh - hh*((20*log10(sp/n))/yfloor);
+		a = 0.1;
+		dd1 = dd0 + dd1*a;
+		dd2 = dd1 + dd2*a;
+		dd = dd2;
+		//dd = hh*sp/n;
 		//dd = win[i]*hh;
-		gfx_rect(j*ss,0,1+1,dd);     
+		gfx_rect(j*ss,0,1,dd);     
 		i += 2;
 		j += 1;
 	);          
