@@ -9,7 +9,7 @@ ylogscale = 1;
 yfloor = 0;
 
 
-n = 128;
+n = 256;
 nn = n * 2;
 rec_buf = 100;
 win = rec_buf + nn;
@@ -18,10 +18,10 @@ ftd = win + nn;
 //window init
 pi = 3.141592;
 i=0;
-loop(n/2,
+loop(n,
   //Blackman window
-  win[i] = 0.42 - 0.5*cos(2*pi*i/(n/2)) + 0.08*cos(4*pi*i/(n/2)); 
-  //win[i] = sin(2*3.141592*i/(n)); //sine/2 window
+  //win[i] = 0.42 - 0.5*cos(2*pi*i/(n)) + 0.08*cos(4*pi*i/(n/2)); 
+  win[i] = sin(2*3.141592*i/(n)); //sine/2 window
   i+=1
 );
 
@@ -33,30 +33,36 @@ rec_i == nn ? rec_j = 2;
 rec_i %= nn;
 
 @gfx
-ss = 2;
+ss = 3;
 ww = 128*ss;
 hh = 64*ss;
-gfx_r = gfx_g = gfx_b = 0.1;
+gfx_set(0.1,0.1,0.1);
 gfx_rect(0,0,ww,hh);
-gfx_r = gfx_g = gfx_b = 1;
-
+gfx_set(1,1,1);
 rec_j ? (
 	i = 0;
 	loop(n,
-		rec_j == 1 ? j = i : j = i + nn/2;
-		ftd[i] = rec_buf[j];// * win[i];
-		i += 1;
+		rec_j == 1 ? bb = j : bb = j + nn/2;
+		ftd[i] = rec_buf[bb] * win[j];
+		ftd[i+1] = 0;
+		i += 2;
+		j += 1;
 	);     
-	fft_real(ftd,n);
+	fft(ftd,n);
 	fft_permute(ftd,n);
+	ftd[0] = 0;    
+	ftd[1] = 0;
 	i = 0;
-	loop(n, 
-		//dd = hh*(abs(ftd[i*4]/n));
-		dd = hh*(log10(ftd[4*i])/n);
-		//dd = win[i*2]*hh;
-		gfx_rect(i*2*ss,0,1+1*ss,dd);
-		i += 1;
-	);     
+	j = 0;
+	loop(n/2, 
+		sp = sqrt(ftd[i]*ftd[i] + ftd[i+1]*ftd[i+1]);
+		dd = hh*6*(sp/n);
+		//dd = hh*(log10(ftd[4*i])/n);
+		//dd = win[i]*hh;
+		gfx_rect(j*ss,0,1+1,dd);     
+		i += 2;
+		j += 1;
+	);          
 	rec_j = 0;     
 );
 
