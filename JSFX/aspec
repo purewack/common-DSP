@@ -4,6 +4,11 @@ in_pin:left input
 in_pin:right input
 
 @init
+xlogscale = 1;
+ylogscale = 0;
+yfloor = 0;
+
+
 n = 128;
 nn = n * 2;
 rec_buf = 100;
@@ -20,24 +25,23 @@ loop(n/2,
 @sample       
 rec_buf[rec_i] = spl0;
 rec_i += 1;
-rec_i == n/2 ? rec_j = 1;
-rec_i == n ? rec_j = 2;
-rec_i %= n;
+rec_i == nn/2 ? rec_j = 1;
+rec_i == nn ? rec_j = 2;
+rec_i %= nn;
 
 @gfx
 ss = 2;
 ww = 128*ss;
 hh = 64*ss;
-gfx_r = gfx_g = 0.1;
+gfx_r = gfx_g = gfx_b = 0.1;
 gfx_rect(0,0,ww,hh);
 gfx_r = gfx_g = gfx_b = 1;
 
 rec_j ? (
 	i = 0;
 	loop(n,
-		rec_j == 1 ? j = 0 : j = n/2;
-		j += i;
-		ftd[i] = rec_buf[j] * win[i];
+		rec_j == 1 ? j = i : j = i + nn/2;
+		ftd[i] = rec_buf[j];// * win[i];
 		i += 1;
 	);     
 	fft_real(ftd,n);
