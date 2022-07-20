@@ -4,7 +4,7 @@ in_pin:left input
 in_pin:right input
 
 @init
-xlogscale = 1;
+xlogscale = 0;
 ylogscale = 0;
 yfloor = 0;
 
@@ -16,9 +16,12 @@ win = rec_buf + nn;
 ftd = win + nn;
 
 //window init
+pi = 3.141592;
 i=0;
 loop(n/2,
-  win[i] = sin(2*3.141592*i/(n)); //half sine window(s)
+  //Blackman window
+  win[i] = 0.42 - 0.5*cos(2*pi*i/(n/2)) + 0.08*cos(4*pi*i/(n/2)); 
+  //win[i] = sin(2*3.141592*i/(n)); //sine/2 window
   i+=1
 );
 
@@ -41,7 +44,7 @@ rec_j ? (
 	i = 0;
 	loop(n,
 		rec_j == 1 ? j = i : j = i + nn/2;
-		ftd[i] = rec_buf[j];// * win[i];
+		ftd[i] = rec_buf[j] * win[i];
 		i += 1;
 	);     
 	fft_real(ftd,n);
