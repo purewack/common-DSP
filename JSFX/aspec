@@ -5,7 +5,7 @@ in_pin:right input
 
 @init
 xlogscale = 0;
-ylogscale = 0;
+ylogscale = 1;
 yfloor = 0;
 
 
@@ -44,14 +44,15 @@ rec_j ? (
 	i = 0;
 	loop(n,
 		rec_j == 1 ? j = i : j = i + nn/2;
-		ftd[i] = rec_buf[j] * win[i];
+		ftd[i] = rec_buf[j];// * win[i];
 		i += 1;
 	);     
 	fft_real(ftd,n);
 	fft_permute(ftd,n);
 	i = 0;
 	loop(n, 
-		dd = hh*(abs(ftd[i*4]/n));          
+		//dd = hh*(abs(ftd[i*4]/n));
+		dd = hh*(log10(ftd[4*i])/n);
 		//dd = win[i*2]*hh;
 		gfx_rect(i*2*ss,0,1+1*ss,dd);
 		i += 1;
