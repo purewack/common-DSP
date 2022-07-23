@@ -8,8 +8,8 @@ xlogscale = 0;
 yfloor = -120;
 
 
-n = 256;
-nn = 512;
+n = 512;
+nn = n*2;
 ftd = 0;
 win = ftd+nn;
 rec = win+nn;
@@ -21,7 +21,7 @@ i=0;
 loop(n,
   //Blackman window
   win[i] = 0.42 - 0.5*cos(2*$pi*i/(n)) + 0.08*cos(4*$pi*i/(n)); 
-  win[i] = sin(2*$pi*i/(nn)); //sine/2 window
+  //win[i] = sin(2*$pi*i/(nn)); //sine/2 window
   //win[i] = 1;
   i+=1;
 );
@@ -35,40 +35,48 @@ rec_j == 0 ? (
 );
 
 @gfx
-ss = 4;
+ss = 12;
 ww = 128*ss;
 hh = 64*ss;
 bg = 0.3;
 gfx_set(bg,bg,bg);
 gfx_rect(0,0,ww,hh);
 gfx_set(1,1,1);
-rec_j ? (
+rec_j ? (     
+	i=0;
+	gfx_set(0,0.7,0);
+	loop(-yfloor/3,
+		dby = 1 - 20*log10(10^(i/20))/yfloor;
+		dby *= hh;
+		gfx_line(0,dby,ww,dby);
+		gfx_x = 0;
+		gfx_y = dby-8;
+		gfx_printf("%ddB",i);   
+		i-=6;
+	);
+	
+	gfx_set(1,1,1);
 	fft(rec,n);
 	fft_permute(rec,n);
 	i = 0;
 	j = 0;
+	sc = (hh*20/(-yfloor * log(10)));
 	loop(n/2, 
-
+		//data
 		dd = log(sqr(rec[i]) + sqr(rec[i+1]));
-		dd = dd*hh*20/(-yfloor * log(10));
+		dd = dd*sc*0.5 + hh*0.63;
 	
 		//phase
 		//dd = abs(atan2(rec[i+1],rec[i]))*hh/4;
-		//dd = win[j]*hh;
-		xlogscale ? xx = ww*log(j)/log(ww/ss) : xx = ss*j;
+		
+		//window
+		//dd = win[i]*hh;
+		
+		1 ? xx = ww*log(1 + j/(n/2))*sqrt(2.088) : xx = ww*j/(n/2);
 		gfx_rect(xx,0,1,dd);     
 		i += 2;
 		j += 1;
 	);          
-	i=0;
-	gfx_set(0,0.7,0);
-
-	loop(0,//abs(yfloor)/3,
-		dby = 1 - 10*log(10^(i/20))/yfloor;
-		dby *= hh;
-		gfx_line(0,dby,ww,dby);  
-		i-=3;
-	);
 	rec_j = 0;  
 );
 
