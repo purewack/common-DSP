@@ -4,10 +4,10 @@ in_pin:left input
 in_pin:right input
 
 @init
-xlogscale = 0;
+xlogscale = 1;
 yfloor = -120;
 
-
+ss = 4;
 n = 512;
 nn = n*2;
 ftd = 0;
@@ -35,7 +35,6 @@ rec_j == 0 ? (
 );
 
 @gfx
-ss = 12;
 ww = 128*ss;
 hh = 64*ss;
 bg = 0.3;
@@ -71,8 +70,13 @@ rec_j ? (
 		
 		//window
 		//dd = win[i]*hh;
-		
-		1 ? xx = ww*log(1 + j/(n/2))*sqrt(2.088) : xx = ww*j/(n/2);
+		lnx = (j+1)/(n/2);
+		xlogscale ? (
+			xx = (1+min(1.0,log(lnx)/(0.69*4)))*0.5;
+			xx *= ww;
+			xx += ww*0.5;
+		) : 
+			xx = ww*j/(n/2);
 		gfx_rect(xx,0,1,dd);     
 		i += 2;
 		j += 1;
