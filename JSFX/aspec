@@ -59,24 +59,24 @@ rec_j ? (
 	fft_permute(rec,n);
 	i = 0;
 	j = 0;
-	sc = (hh*20/(-yfloor * log(10)));
+	sc = (hh*5/(-yfloor));
 	loop(n/2, 
-		//data
+		//data - ylogscale
 		dd = log(sqr(rec[i]) + sqr(rec[i+1]));
-		dd = dd*sc*0.5 + hh*0.63;
+		dd = dd*sc + hh*0.63;
 	
 		//phase
 		//dd = abs(atan2(rec[i+1],rec[i]))*hh/4;
 		
 		//window
 		//dd = win[i]*hh;
-		lnx = (j+1)/(n/2);
-		xlogscale ? (
-			xx = (1+min(1.0,log(lnx)/(0.69*4)))*0.5;
+		xlogscale ? (          
+			lnx = (j+1)/(n/2);
+			xx = 1+min(1.0,log(lnx)/(log(0.5)*-8));
 			xx *= ww;
-			xx += ww*0.5;
 		) : 
 			xx = ww*j/(n/2);
+			
 		gfx_rect(xx,0,1,dd);     
 		i += 2;
 		j += 1;
