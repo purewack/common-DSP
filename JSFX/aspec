@@ -6,9 +6,9 @@ in_pin:right input
 @init
 xlogscale = 1;
 yfloor = -120;
-
+mmm = -1000;
 ss = 4;
-n = 512;
+n = 128;
 nn = n*2;
 ftd = 0;
 win = ftd+nn;
@@ -21,8 +21,8 @@ i=0;
 loop(n,
   //Blackman window
   win[i] = 0.42 - 0.5*cos(2*$pi*i/(n)) + 0.08*cos(4*$pi*i/(n)); 
-  //win[i] = sin(2*$pi*i/(nn)); //sine/2 window
-  //win[i] = 1;
+  win[i] = sin(2*$pi*i/(nn)); //sine/2 window
+  win[i] = 1;
   i+=1;
 );
 
@@ -59,12 +59,16 @@ rec_j ? (
 	fft_permute(rec,n);
 	i = 0;
 	j = 0;
-	sc = (hh*5/(-yfloor));
+	sc = (hh*20/(-yfloor*log(10)));
+	mm = -1000;
 	loop(n/2, 
 		//data - ylogscale
-		dd = log(sqr(rec[i]) + sqr(rec[i+1]));
-		dd = dd*sc + hh*0.63;
-	
+		dd = log(sqr(rec[i]) + sqr(rec[i+1])) / log(n/2);
+		dd = dd - 1;
+		aa > mm ? mm = aa; 
+		
+		dd = dd*hh;
+		
 		//phase
 		//dd = abs(atan2(rec[i+1],rec[i]))*hh/4;
 		
@@ -72,7 +76,7 @@ rec_j ? (
 		//dd = win[i]*hh;
 		xlogscale ? (          
 			lnx = (j+1)/(n/2);
-			xx = 1+min(1.0,log(lnx)/(log(0.5)*-8));
+			xx = 1+min(1.0,log(lnx)/(log(0.595)*-8));
 			xx *= ww;
 		) : 
 			xx = ww*j/(n/2);
@@ -81,6 +85,8 @@ rec_j ? (
 		i += 2;
 		j += 1;
 	);          
+	
+	mm > mmm ? mmm = mm;
 	rec_j = 0;  
 );
 
