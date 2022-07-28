@@ -1,5 +1,7 @@
 desc:Basic Spectrum
 
+//https://dsp.stackexchange.com/questions/32076/fft-to-spectrum-in-decibel
+//compensation of window = sum(win[0:n])
 in_pin:left input
 in_pin:right input
 
