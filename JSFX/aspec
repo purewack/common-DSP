@@ -1,7 +1,10 @@
 desc:Basic Spectrum
 
 //https://dsp.stackexchange.com/questions/32076/fft-to-spectrum-in-decibel
-//compensation of window = sum(win[0:n])
+slider1:4<1,10,1> Screen Scale
+slider2:-120<-160,-18,1> Floor dB
+slider3:1<0,1,1{no,yes}> xlogscale
+slider4:1<0,1,1{no,yes}> ylogscale
 in_pin:left input
 in_pin:right input
 
@@ -9,8 +12,7 @@ in_pin:right input
 xlogscale = 1;
 yfloor = -120;
 mmm = -1000;
-ss = 4;
-n = 1024;
+n = 2048;
 nn = n*2;
 ftd = 0;
 win = ftd+nn;
@@ -30,6 +32,12 @@ loop(n,
   i+=1;
 );
 
+@slider
+ss = slider1;
+ww = 128*ss;
+yfloor = slider2;
+xlogscale = slider3;
+ylogscale = slider4;
 
 @sample       
 rec_j == 0 ? (
@@ -50,7 +58,7 @@ rec_j ? (
 	i=0;
 	gfx_set(0,0.7,0);
 	loop(-yfloor/3,
-		dby = 1 - 20*log10(10^(i/20))/yfloor;
+		dby = 1 - 20*(i/20)/yfloor;
 		dby *= hh;
 		gfx_line(0,dby,ww,dby);
 		gfx_x = 0;
@@ -59,9 +67,31 @@ rec_j ? (
 		i-=6;
 	);
 	
+	i = 0;
+	j = 0;
+	xlogscale ? (
+	loop(3,
+		i = 1;
+		loop(9,
+			gfx_set(i/10,0,0);
+			hzx = log10(1+i);
+			hzx *= ww/3;
+			hzx += j*ww/3;
+			hzx -= ww*0.11;
+			gfx_line(hzx,0,hzx,hh);
+			gfx_x = hzx;
+			gfx_y = hh+8;
+			gfx_printf("%i",i);
+			i+=1;
+		);
+		j+=1;
+	);
+	);
+	
 	gfx_set(1,1,1);
 	fft(rec,n);
 	fft_permute(rec,n);
+	rec[0] = 0;
 	i = 0;
 	j = 0;
 	mm = -1000;
@@ -78,13 +108,15 @@ rec_j ? (
 		
 		//window
 		//dd = win[i]*hh;
-		0 /*xlogscale*/ ? (          
-			lnx = (j+1)/(n/2);
-			xx = 1+min(1.0,log(lnx)/(log(0.595)*-8));
+		ix = j/(n/2);
+		xlogscale ? (
+			xx = log10(1 + 1000*ix)/3;
+			axx = xx;
 			xx *= ww;
 		) : 
-			xx = ww*j/(n/2);
-			
+			xx = ww*ix;
+		
+		j == 0 ? gfx_set(1,1,0) : gfx_set(1,1,1);
 		gfx_rect(xx,0,1,dd);     
 		i += 2;
 		j += 1;
@@ -93,4 +125,3 @@ rec_j ? (
 	mm > mmm ? mmm = mm;
 	rec_j = 0;  
 );
-
