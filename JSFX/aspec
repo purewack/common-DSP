@@ -5,10 +5,10 @@ in_pin:right input
 
 @init
 xlogscale = 1;
-yfloor = -120;
+yfloor = -60;
 mmm = -1000;
 ss = 4;
-n = 128;
+n = 1024;
 nn = n*2;
 ftd = 0;
 win = ftd+nn;
@@ -59,22 +59,21 @@ rec_j ? (
 	fft_permute(rec,n);
 	i = 0;
 	j = 0;
-	sc = (hh*20/(-yfloor*log(10)));
 	mm = -1000;
 	loop(n/2, 
 		//data - ylogscale
-		dd = log(sqr(rec[i]) + sqr(rec[i+1])) / log(n/2);
-		dd = dd - 1;
+		dd = (sqrt(sqr(rec[i]) + sqr(rec[i+1]))) / (n/2);
+		dd = 20*log10(dd/1.0) / (-yfloor);
+		aa = dd;
 		aa > mm ? mm = aa; 
-		
-		dd = dd*hh;
+		dd = hh + dd*hh;
 		
 		//phase
 		//dd = abs(atan2(rec[i+1],rec[i]))*hh/4;
 		
 		//window
 		//dd = win[i]*hh;
-		xlogscale ? (          
+		0 /*xlogscale*/ ? (          
 			lnx = (j+1)/(n/2);
 			xx = 1+min(1.0,log(lnx)/(log(0.595)*-8));
 			xx *= ww;
