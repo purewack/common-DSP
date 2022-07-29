@@ -13,7 +13,7 @@ in_pin:right input
 xlogscale = 1;
 yfloor = -120;
 mmm = -1000;
-n = 2048;
+n = 512;
 nn = n*2;
 ftd = 0;
 win = ftd+nn;
@@ -96,6 +96,8 @@ rec_j ? (
 	//rec[0] = 0;
 	i = 0;
 	j = 0;
+	px = 0;
+	pw = 0;
 	mm = -1000;
 	loop(n/2, 
 		//data - ylogscale
@@ -119,7 +121,7 @@ rec_j ? (
 			xx = ww*ix;
 		
 		j == 0 ? gfx_set(1,1,0) : gfx_set(1,1,1);
-		gfx_rect(xx,0,1,dd);     
+		gfx_rect(xx,0,1,dd);  
 		i += 2;
 		j += 1;
 	);          

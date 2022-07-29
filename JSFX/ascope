@@ -3,16 +3,28 @@ desc:Basic Scope
 in_pin:left input
 in_pin:right input
 
+slider1:1<1,20,0.2> Timebase
+slider2:1<0.5,20,0.1> YGain
+slider3:0.5<0,1,0.05> Trigger
+slider4:0<0,1,1> Hold
+
+@slider
+trig_timebase = slider1;
+ygain = slider2;
+trig_lvl = slider3;
+hold = slider4;
+
 @init
 rec_buf_size = 1024;
-rec_buf = 100;
-trig_lvl = 0.01;
+rec_buf = 0;
+trig_lvl = 0.1;
 trig = 0;
 trig_T = 0;
 freq = 0;
-trig_timebase = 6;
+trig_timebase = 1;
 
-@sample       
+@sample    
+!hold ? (
 	trig_T += 1;   
 	spl0 > trig_lvl && spl00 < trig_lvl ? (
 		!trig ? (
@@ -38,7 +50,9 @@ trig_timebase = 6;
 		);
 	);
 	spl00 = spl0;
-
+) : (
+	rec_buf_full = 0;
+);
 
 @gfx
 ww = gfx_w;
@@ -56,7 +70,7 @@ rec_buf_full == 0 ? (
 		xx = ii;
 		iii += 1;
 		yy = rec_buf[i];
-		yy = hh/2 + yy*hh;
+		yy = hh/2 + yy*hh*ygain/2;
 		yy = max(0,min(hh,yy));
 		yy < hh/2 ?
 		gfx_rect(xx,yy,1,hh/2-yy)
@@ -81,10 +95,10 @@ tb = rec_buf_size / trig_timebase;
 tbs = srate / tb / 2;
 gfx_printf("TB: %dSPL %fHz",tb,tbs);
 
-tyy = hh/2 - hh*trig_lvl;
+tyy = hh/2 - hh*ygain*trig_lvl/2;
 gfx_line(0,tyy, ww,tyy); 
+
 //);
 //: (
 //     ii = 0;
 //);
-
