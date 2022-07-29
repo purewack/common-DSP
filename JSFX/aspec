@@ -1,10 +1,11 @@
-desc:Basic Spectrum
+desc:Basic Spectrum Analyser
 
 //https://dsp.stackexchange.com/questions/32076/fft-to-spectrum-in-decibel
 slider1:4<1,10,1> Screen Scale
 slider2:-120<-160,-18,1> Floor dB
 slider3:1<0,1,1{no,yes}> xlogscale
 slider4:1<0,1,1{no,yes}> ylogscale
+slider5:1000<20,20000,1}> centre F
 in_pin:left input
 in_pin:right input
 
@@ -38,13 +39,14 @@ ww = 128*ss;
 yfloor = slider2;
 xlogscale = slider3;
 ylogscale = slider4;
+cf = slider5;
 
 @sample       
 rec_j == 0 ? (
 	rec[rec_i] = spl0 * win[rec_i/2];
 	rec[rec_i + 1] = 0;
 	rec_i += 2;
-	rec_i == nn ? (rec_j = 1; rec_i = 0;);
+	rec_i == nn ? rec_j = 1;;
 );
 
 @gfx
@@ -67,31 +69,31 @@ rec_j ? (
 		i-=6;
 	);
 	
+	oct = 1;
 	i = 0;
-	j = 0;
 	xlogscale ? (
-	loop(3,
-		i = 1;
-		loop(9,
-			gfx_set(i/10,0,0);
-			hzx = log10(1+i);
-			hzx *= ww/3;
-			hzx += j*ww/3;
-			hzx -= ww*0.11;
+		loop(29,
+			gfx_set(1-i/10,0,0);
+			base = 10^(oct);
+			fr = base + base*i;
+			hzx = log10(1000 * (2*fr)/srate)/3;
+			hzx *= ww;
 			gfx_line(hzx,0,hzx,hh);
 			gfx_x = hzx;
-			gfx_y = hh+8;
-			gfx_printf("%i",i);
-			i+=1;
+			gfx_y = hh + (i==0 ? 16 : 8);
+			gfx_printf("%i",i == 0 ? base : i+1);
+			i+=1;          
+			i == 9 ? (
+				oct+=1;          
+				i = 0;
+			);
 		);
-		j+=1;
-	);
 	);
 	
 	gfx_set(1,1,1);
 	fft(rec,n);
 	fft_permute(rec,n);
-	rec[0] = 0;
+	//rec[0] = 0;
 	i = 0;
 	j = 0;
 	mm = -1000;
@@ -110,7 +112,7 @@ rec_j ? (
 		//dd = win[i]*hh;
 		ix = j/(n/2);
 		xlogscale ? (
-			xx = log10(1 + 1000*ix)/3;
+			xx = log10(1000*ix)/log10(1000);
 			axx = xx;
 			xx *= ww;
 		) : 
@@ -123,5 +125,6 @@ rec_j ? (
 	);          
 	
 	mm > mmm ? mmm = mm;
+	rec_i = 0;
 	rec_j = 0;  
 );
