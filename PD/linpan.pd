@@ -1,0 +1,18 @@
+#N canvas 668 415 450 300 12;
+#X obj 120 90 inlet~;
+#X obj 120 240 outlet~;
+#X obj 210 240 outlet~;
+#X obj 190 90 inlet;
+#X obj 150 180 *~;
+#X obj 200 180 *~;
+#X obj 170 150 * -1;
+#X obj 170 120 - 1;
+#X text 70 60 linear pan \, 0 to 1 ctrl 0.5C 0.0L 1.0R;
+#X connect 0 0 4 0;
+#X connect 0 0 5 0;
+#X connect 3 0 7 0;
+#X connect 3 0 5 1;
+#X connect 4 0 1 0;
+#X connect 5 0 2 0;
+#X connect 6 0 4 1;
+#X connect 7 0 6 0;
