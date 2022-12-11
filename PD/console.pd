@@ -1,37 +1,28 @@
-#N canvas 377 558 498 383 12;
-#X obj 310 20 vu 19 200 vu_output_1 empty -1 -10 0 12 #404040 #000000
-1 0;
-#X obj 140 20 vsl 19 200 60 100 0 0 slider_input_db empty empty 0 -9
-0 12 #fcfcfc #000000 #000000 19900 1;
-#X floatatom 140 230 5 0 0 0 - - vol_input, f 5;
-#X obj 310 260 tgl 19 0 mono empty empty 0 -10 0 12 #fcfcfc #000000
-#000000 0 1;
-#X obj 370 20 vu 19 200 vu_output_2 empty -1 -10 0 12 #404040 #000000
-1 0;
-#X obj 310 230 tgl 19 0 phase_1 empty empty 0 -10 0 12 #fcfcfc #000000
-#000000 0 1;
-#X obj 370 230 tgl 19 0 phase_2 empty empty 0 -10 0 12 #fcfcfc #000000
-#000000 0 1;
+#N canvas 1078 535 498 383 12;
+#X obj 310 20 vu 19 200 vu_output_1 empty -1 -10 0 12 #404040 #000000 1 0;
+#X obj 140 20 vsl 19 200 60 100 0 0 slider_input_db empty empty 0 -9 0 12 #fcfcfc #000000 #000000 0 1;
+#X floatatom 140 230 5 0 0 0 - - vol_input 0;
+#X obj 310 260 tgl 19 0 mono empty empty 0 -10 0 12 #fcfcfc #000000 #000000 0 1;
+#X obj 370 20 vu 19 200 vu_output_2 empty -1 -10 0 12 #404040 #000000 1 0;
+#X obj 310 230 tgl 19 0 phase_1 empty empty 0 -10 0 12 #fcfcfc #000000 #000000 0 1;
+#X obj 370 230 tgl 19 0 phase_2 empty empty 0 -10 0 12 #fcfcfc #000000 #000000 0 1;
 #X text 330 230 Phase;
 #X text 330 260 Mono;
-#X obj 20 20 vu 19 200 vu_input_1 empty -1 -10 0 12 #404040 #000000
-1 0;
-#X obj 78 20 vu 19 200 vu_input_2 empty -1 -10 0 12 #404040 #000000
-1 0;
-#X obj 430 20 vsl 19 200 0 100 0 0 vol_output empty empty 0 -9 0 12
-#fcfcfc #000000 #000000 19900 1;
-#X floatatom 430 230 5 0 0 0 - - -, f 5;
+#X obj 20 20 vu 19 200 vu_input_1 empty -1 -10 0 12 #404040 #000000 1 0;
+#X obj 78 20 vu 19 200 vu_input_2 empty -1 -10 0 12 #404040 #000000 1 0;
+#X obj 430 20 vsl 19 200 0 120 0 0 vol_output empty empty 0 -9 0 12 #fcfcfc #000000 #000000 0 1;
+#X floatatom 430 230 5 0 0 0 - - - 0;
 #N canvas 994 364 450 548 wiring 0;
-#X obj 10 70 trim;
+#X obj 10 57 trim;
 #X obj 10 520 dac~ 1;
 #X obj 10 10 adc~ 1;
 #X obj 140 70 trim;
 #X obj 140 10 adc~ 2;
 #X obj 140 520 dac~ 2;
-#X obj 30 100 s vu_input_1;
-#X obj 30 40 r vol_input;
+#X obj 30 80 s vu_input_1;
+#X obj 31 34 r vol_input;
 #X obj 160 40 r vol_input;
-#X obj 160 100 s vu_input_2;
+#X obj 180 88 s vu_input_2;
 #X obj 10 460 trim;
 #X obj 30 430 r vol_output;
 #X obj 30 490 s vu_output_1;
@@ -55,15 +46,18 @@
 #X obj 110 400 *~;
 #X obj 140 400 *~;
 #X obj 80 330 == 0;
-#X floatatom 50 360 5 0 0 0 - - -, f 5;
-#X floatatom 90 360 5 0 0 0 - - -, f 5;
+#X floatatom 50 360 5 0 0 0 - - - 0;
+#X floatatom 90 360 5 0 0 0 - - - 0;
 #X obj 50 270 loadbang;
 #X msg 40 300 0;
-#X obj 100 120 loadbang;
-#X connect 0 0 20 0;
+#X obj 67 7 loadbang;
+#X obj 10 115 hip~;
+#X obj 141 114 hip~;
+#X obj 63 107 r in_hip;
+#X connect 0 0 38 0;
 #X connect 0 1 6 0;
 #X connect 2 0 0 0;
-#X connect 3 0 24 0;
+#X connect 3 0 39 0;
 #X connect 3 1 9 0;
 #X connect 4 0 3 0;
 #X connect 7 0 0 1;
@@ -106,9 +100,15 @@
 #X connect 36 0 33 0;
 #X connect 37 0 18 0;
 #X connect 37 0 22 0;
+#X connect 38 0 20 0;
+#X connect 39 0 24 0;
+#X connect 40 0 38 1;
+#X connect 40 0 39 1;
 #X restore 20 230 pd wiring;
 #X f 11;
-#X text 50 280 Inputs;
+#X text 35 302 Inputs;
 #X text 400 280 Outputs;
+#X floatatom 22 256 5 0 0 0 - - in_hip 0;
+#X text 60 255 Input Hi pass;
 #X connect 1 0 2 0;
 #X connect 11 0 12 0;
