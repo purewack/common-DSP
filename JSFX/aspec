@@ -1,0 +1,132 @@
+desc:Basic Spectrum Analyser
+
+//https://dsp.stackexchange.com/questions/32076/fft-to-spectrum-in-decibel
+slider1:4<1,10,1> Screen Scale
+slider2:-120<-160,-18,1> Floor dB
+slider3:1<0,1,1{no,yes}> xlogscale
+slider4:1<0,1,1{no,yes}> ylogscale
+slider5:1000<20,20000,1}> centre F
+in_pin:left input
+in_pin:right input
+
+@init
+xlogscale = 1;
+yfloor = -120;
+mmm = -1000;
+n = 512;
+nn = n*2;
+ftd = 0;
+win = ftd+nn;
+rec = win+nn;
+rec_j = 0;
+rec_i = 0;
+
+//window init
+i=0;
+wincomp = 0;
+loop(n,
+  //Blackman window
+  win[i] = 0.42 - 0.5*cos(2*$pi*i/(n)) + 0.08*cos(4*$pi*i/(n)); 
+  //win[i] = sin(2*$pi*i/(nn)); //sine/2 window
+  //win[i] = 1;
+  wincomp += win[i];
+  i+=1;
+);
+
+@slider
+ss = slider1;
+ww = 128*ss;
+yfloor = slider2;
+xlogscale = slider3;
+ylogscale = slider4;
+cf = slider5;
+
+@sample       
+rec_j == 0 ? (
+	rec[rec_i] = spl0 * win[rec_i/2];
+	rec[rec_i + 1] = 0;
+	rec_i += 2;
+	rec_i == nn ? rec_j = 1;;
+);
+
+@gfx
+ww = 128*ss;
+hh = 64*ss;
+bg = 0.3;
+gfx_set(bg,bg,bg);
+gfx_rect(0,0,ww,hh);
+gfx_set(1,1,1);
+rec_j ? (     
+	i=0;
+	gfx_set(0,0.7,0);
+	loop(-yfloor/3,
+		dby = 1 - 20*(i/20)/yfloor;
+		dby *= hh;
+		gfx_line(0,dby,ww,dby);
+		gfx_x = 0;
+		gfx_y = dby-8;
+		gfx_printf("%ddB",i);   
+		i-=6;
+	);
+	
+	oct = 1;
+	i = 0;
+	xlogscale ? (
+		loop(29,
+			gfx_set(1-i/10,0,0);
+			base = 10^(oct);
+			fr = base + base*i;
+			hzx = log10(1000 * (2*fr)/srate)/3;
+			hzx *= ww;
+			gfx_line(hzx,0,hzx,hh);
+			gfx_x = hzx;
+			gfx_y = hh + (i==0 ? 16 : 8);
+			gfx_printf("%i",i == 0 ? base : i+1);
+			i+=1;          
+			i == 9 ? (
+				oct+=1;          
+				i = 0;
+			);
+		);
+	);
+	
+	gfx_set(1,1,1);
+	fft(rec,n);
+	fft_permute(rec,n);
+	//rec[0] = 0;
+	i = 0;
+	j = 0;
+	px = 0;
+	pw = 0;
+	mm = -1000;
+	loop(n/2, 
+		//data - ylogscale
+		dd = (sqrt(sqr(rec[i]) + sqr(rec[i+1]))) / (wincomp/2);
+		dd = 20*log10(dd/1.0) / (-yfloor);
+		aa = dd;
+		aa > mm ? mm = aa; 
+		dd = hh + dd*hh;
+		
+		//phase
+		//dd = abs(atan2(rec[i+1],rec[i]))*hh/4;
+		
+		//window
+		//dd = win[i]*hh;
+		ix = j/(n/2);
+		xlogscale ? (
+			xx = log10(1000*ix)/log10(1000);
+			axx = xx;
+			xx *= ww;
+		) : 
+			xx = ww*ix;
+		
+		j == 0 ? gfx_set(1,1,0) : gfx_set(1,1,1);
+		gfx_rect(xx,0,1,dd);  
+		i += 2;
+		j += 1;
+	);          
+	
+	mm > mmm ? mmm = mm;
+	rec_i = 0;
+	rec_j = 0;  
+);

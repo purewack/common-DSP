@@ -1,0 +1,104 @@
+desc:Basic Scope
+
+in_pin:left input
+in_pin:right input
+
+slider1:1<1,20,0.2> Timebase
+slider2:1<0.5,20,0.1> YGain
+slider3:0.5<0,1,0.05> Trigger
+slider4:0<0,1,1> Hold
+
+@slider
+trig_timebase = slider1;
+ygain = slider2;
+trig_lvl = slider3;
+hold = slider4;
+
+@init
+rec_buf_size = 1024;
+rec_buf = 0;
+trig_lvl = 0.1;
+trig = 0;
+trig_T = 0;
+freq = 0;
+trig_timebase = 1;
+
+@sample    
+!hold ? (
+	trig_T += 1;   
+	spl0 > trig_lvl && spl00 < trig_lvl ? (
+		!trig ? (
+			trig |= 1;
+			in_i = 0;    
+		);                       
+		freq_av += srate / trig_T;
+		freq_avc += 1;
+		freq_avc == 10 ? (
+			freq = freq_av / freq_avc;
+			freq_avc = 0;
+			freq_av = 0; 
+		);
+		trig_T = 0;  
+	);     
+	rec_buf_full == -1 ? (
+		rec_buf[in_i] = -spl0;
+		in_i = in_i + 1;     
+		in_i == rec_buf_size-1 ? (
+			in_i = 0;
+			rec_buf_full = 0;
+			//trig == 1 ? trig = 2;         
+		);
+	);
+	spl00 = spl0;
+) : (
+	rec_buf_full = 0;
+);
+
+@gfx
+ww = gfx_w;
+hh = gfx_h;
+//gfx_r = gfx_g = gfx_b = 0.1;
+//gfx_rect(0,0,128,64);
+gfx_r = gfx_g = gfx_b = 1;
+gfx_line(0,hh/2,ww,hh/2);
+rec_buf_full == 0 ? (
+	ii = 0;
+	iii = 0;
+	xxo= 0;
+	yyo=hh/2;
+	loop(ww, 
+		xx = ii;
+		iii += 1;
+		yy = rec_buf[i];
+		yy = hh/2 + yy*hh*ygain/2;
+		yy = max(0,min(hh,yy));
+		yy < hh/2 ?
+		gfx_rect(xx,yy,1,hh/2-yy)
+		:
+		gfx_rect(xx,hh/2,1,yy - hh/2);
+		xxo = xx;
+		yyo = yy;
+		ii = (ii + 1);
+		i = ii/trig_timebase;
+	);
+	trig ? trig = 0;
+	rec_buf_full = -1;
+);
+gfx_r = gfx_g = gfx_b = 0;
+gfx_rect(0,0,gfx_w,16);
+gfx_r = gfx_g = gfx_b = 1;
+gfx_x = gfx_y = 0;
+gfx_printf("TR: %.3f (%.2fdB) F:%.2f",trig_lvl,-0.00001 + 20*log10(trig_lvl), freq);
+gfx_y = 8;
+gfx_x = 0;
+tb = rec_buf_size / trig_timebase;
+tbs = srate / tb / 2;
+gfx_printf("TB: %dSPL %fHz",tb,tbs);
+
+tyy = hh/2 - hh*ygain*trig_lvl/2;
+gfx_line(0,tyy, ww,tyy); 
+
+//);
+//: (
+//     ii = 0;
+//);
